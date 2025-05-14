@@ -31,7 +31,7 @@ jobs:
             echo "should_run=false" >> $GITHUB_OUTPUT
           fi
 
-  build-macos:
+  build-binaries:
     needs: precheck
     if: needs.precheck.outputs.should_run == 'true'
     runs-on: macos-latest

@@ -34,7 +34,7 @@ jobs:
             echo "should_run=false" >> $GITHUB_OUTPUT
           fi
 
-  build-verify-binaries:
+  build-binaries:
     needs: precheck
     if: needs.precheck.outputs.should_run == 'true'
     runs-on: ubuntu-latest
@@ -109,7 +109,7 @@ jobs:
 
   test-and-upload:
     runs-on: ubuntu-latest
-    needs: build-verify-binaries
+    needs: build-binaries
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -155,7 +155,7 @@ jobs:
 
   delete-linux-artifacts:
     runs-on: ubuntu-latest
-    needs: [build-verify-binaries, test-and-upload]
+    needs: [build-binaries, test-and-upload]
     if: always()
     steps:
       - name: Delete 'linux-artifacts' if it exists
