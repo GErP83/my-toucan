@@ -35,6 +35,6 @@ jobs:
     uses: ./.github/workflows/macos.yml
     with:
       version: ${{ needs.prepare.outputs.version }}
-      run_pkg: false
+      run_pkg: true
       run_dmg: false
     secrets: inherit
