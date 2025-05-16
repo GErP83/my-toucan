@@ -49,7 +49,7 @@ jobs:
         run: |
           chmod +x ./scripts/packaging/*.sh
           apt-get update
-          apt-get install -y curl git clang libcurl4-openssl-dev libssl-dev libatomic1
+          apt-get install -y curl git clang libcurl4-openssl-dev libssl-dev libatomic1 zip
 
       - name: Install RPM tooling
         if: inputs.run_rpm
