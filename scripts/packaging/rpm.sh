@@ -52,7 +52,7 @@ cp -f LICENSE README.md "$WORKDIR/${NAME}-${VERSION}/" 2>/dev/null || echo "â„¹ï
 tar -czf "$TOPDIR/SOURCES/$TARBALL" -C "$WORKDIR" "${NAME}-${VERSION}"
 
 # Copy .spec file
-cp "packaging/${NAME}.spec" "$TOPDIR/SPECS/"
+cp "./scripts/packaging/${NAME}.spec" "$TOPDIR/SPECS/"
 
 # Build the RPM
 rpmbuild -ba "$TOPDIR/SPECS/${NAME}.spec" --define "ver $VERSION"
