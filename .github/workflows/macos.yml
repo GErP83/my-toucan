@@ -40,6 +40,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Apple WWDR intermediate cert
+        run: |
+          curl -O https://www.apple.com/certificateauthority/AppleWWDRCAG4.cer
+          security add-trusted-cert -d -k ~/Library/Keychains/login.keychain-db AppleWWDRCAG4.cer
+
       - name: Import Developer ID certificates
         uses: apple-actions/import-codesign-certs@v3
         with:
