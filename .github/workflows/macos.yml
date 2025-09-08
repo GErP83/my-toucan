@@ -34,16 +34,16 @@ jobs:
   build-binaries:
     needs: precheck
     if: needs.precheck.outputs.should_run == 'true'
-    runs-on: macos-latest
+    runs-on: macos-14
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Apple WWDR intermediate cert
-        run: |
-          curl -O https://www.apple.com/certificateauthority/AppleWWDRCAG4.cer
-          security add-certificates -k ~/Library/Keychains/login.keychain-db AppleWWDRCAG4.cer
+     # - name: Install Apple WWDR intermediate cert
+     #   run: |
+     #     curl -O https://www.apple.com/certificateauthority/AppleWWDRCAG4.cer
+     #     security add-certificates -k ~/Library/Keychains/login.keychain-db AppleWWDRCAG4.cer
 
       - name: Import Developer ID certificates
         uses: apple-actions/import-codesign-certs@v3
