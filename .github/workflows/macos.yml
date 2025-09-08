@@ -40,6 +40,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Import Developer ID certificates
+        uses: apple-actions/import-codesign-certs@v3
+        with:
+          p12-file-base64: ${{ secrets.MAC_CERTIFICATES }}
+          p12-password: ${{ secrets.MAC_CERTIFICATES_PASSWORD }}
+
+      - name: List certificates in keychain
+        run: security find-identity
+
       - name: Install Swift 6.1.2
         run: |
           curl -L https://download.swift.org/swift-6.1.2-release/xcode/swift-6.1.2-RELEASE/swift-6.1.2-RELEASE-osx.pkg -o swift.pkg
@@ -48,15 +57,6 @@ jobs:
           swift --version
           export PATH="/Library/Developer/Toolchains/swift-6.0-RELEASE.xctoolchain/usr/bin:$PATH"
 
-      - name: Import Developer ID certificates
-        uses: apple-actions/import-codesign-certs@v3
-        with:
-          p12-file-base64: ${{ secrets.MAC_CERTIFICATES }}
-          p12-password: ${{ secrets.MAC_CERTIFICATES_PASSWORD }}
-
-      - name: List certificates in keychain
-        run: security find-identity -v -p codesigning
-        
       - name: Build Swift binaries for arm64 and x86_64
         if: inputs.run_pkg
         run: |
