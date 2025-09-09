@@ -56,7 +56,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: GErP83/homebrew-my-toucan   # Replace with your actual tap repo
-          token: ${{ secrets.HOMEBREW_TAP_PAT }}
+          #token: ${{ secrets.HOMEBREW_TAP_PAT }}
           ref: main  # or 'master'
 
       - name: Download SHA256 files from release
