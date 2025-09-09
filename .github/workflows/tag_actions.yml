@@ -69,8 +69,8 @@ jobs:
       - name: Read SHA256 values
         id: shas
         run: |
-          macos_sha=$(cut -d ' ' -f1 toucan-macos-${{ needs.prepare.outputs.version }}.sha256)
-          linux_sha=$(cut -d ' ' -f1 toucan-linux-${{ needs.prepare.outputs.version }}.sha256)
+          macos_sha=$(cut -d ' ' -f1 toucan-macos-1.0.0-beta.7.sha256)
+          linux_sha=$(cut -d ' ' -f1 toucan-linux-1.0.0-beta.7.sha256)
           echo "macos_sha=$macos_sha" >> $GITHUB_OUTPUT
           echo "linux_sha=$linux_sha" >> $GITHUB_OUTPUT
 
@@ -80,13 +80,13 @@ jobs:
           class MyToucan < Formula
             desc "Toucan is a static site generator written in Swift."
             homepage "https://github.com/GErP83/my-toucan"
-            version "${{ needs.prepare.outputs.version }}"
+            version "1.0.0-beta.7"
 
             if OS.mac?
-              url "https://github.com/GErP83/my-toucan/releases/download/${{ needs.prepare.outputs.version }}/toucan-macos-${{ needs.prepare.outputs.version }}.zip"
+              url "https://github.com/GErP83/my-toucan/releases/download/1.0.0-beta.7/toucan-macos-1.0.0-beta.7.zip"
               sha256 "${{ steps.shas.outputs.macos_sha }}"
             elsif OS.linux?
-              url "https://github.com/GErP83/my-toucan/releases/download/${{ needs.prepare.outputs.version }}/toucan-linux-${{ needs.prepare.outputs.version }}.zip"
+              url "https://github.com/GErP83/my-toucan/releases/download/1.0.0-beta.7/toucan-linux-1.0.0-beta.7.zip"
               sha256 "${{ steps.shas.outputs.linux_sha }}"
             end
 
