@@ -2,11 +2,11 @@ name: Dispatch macOS and Linux Builds on new tag
 
 on:
   push:
-    #branches:
-    #  - main
-    tags:
-      - 'v*'
-      - '[0-9]*'
+    branches:
+      - main
+    #tags:
+    #  - 'v*'
+    #  - '[0-9]*'
 
 permissions:
   contents: write
@@ -19,27 +19,94 @@ jobs:
     steps:
       - name: Extract version from tag
         id: extract
+        #VERSION="${GITHUB_REF#refs/tags/}"
+        #VERSION="${VERSION//-/.}"  # Replace hyphens for RPM compatibility
         run: |
-          VERSION="${GITHUB_REF#refs/tags/}"
-          VERSION="${VERSION//-/.}"  # Replace hyphens for RPM compatibility
+          VERSION= "1.0.0-beta.7"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-  linux:
-    needs: prepare
-    uses: ./.github/workflows/linux.yml
-    with:
-      version: ${{ needs.prepare.outputs.version }}
-      run_rpm: true
-      run_deb: true
-      static_stdlib: true
-    secrets: inherit
+  #linux:
+  #  needs: prepare
+  #  uses: ./.github/workflows/linux.yml
+  #  with:
+  #    version: ${{ needs.prepare.outputs.version }}
+  #    run_rpm: true
+  #    run_deb: true
+  #    static_stdlib: true
+  #  secrets: inherit
 
-  macos:
-    needs: prepare
-    uses: ./.github/workflows/macos.yml
-    with:
-      version: ${{ needs.prepare.outputs.version }}
-      run_pkg: true
-      run_dmg: false
-    secrets: inherit
+  #macos:
+  #  needs: prepare
+  #  uses: ./.github/workflows/macos.yml
+  #  with:
+  #    version: ${{ needs.prepare.outputs.version }}
+  #    run_pkg: true
+  #    run_dmg: false
+  #  secrets: inherit
+
+  push_formula:
+    name: Push Homebrew Formula
+    #needs: [linux, macos, prepare]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Tap Repo
+        uses: actions/checkout@v4
+        with:
+          repository: GErP83/homebrew-my-toucan   # Replace with your actual tap repo
+          token: ${{ secrets.HOMEBREW_TAP_PAT }}
+          ref: main  # or 'master'
+
+      - name: Download SHA256 files from release
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          BASE_URL="https://github.com/GErP83/my-toucan/releases/download/$VERSION"
+          curl -LO "$BASE_URL/toucan-linux-$VERSION.sha256"
+          curl -LO "$BASE_URL/toucan-macos-$VERSION.sha256"
+
+      - name: Read SHA256 values
+        id: shas
+        run: |
+          macos_sha=$(cut -d ' ' -f1 toucan-macos-${{ needs.prepare.outputs.version }}.sha256)
+          linux_sha=$(cut -d ' ' -f1 toucan-linux-${{ needs.prepare.outputs.version }}.sha256)
+          echo "macos_sha=$macos_sha" >> $GITHUB_OUTPUT
+          echo "linux_sha=$linux_sha" >> $GITHUB_OUTPUT
+
+      - name: Write Formula File
+        run: |
+          cat > Formula/my-toucan.rb <<EOF
+          class MyToucan < Formula
+            desc "Toucan is a static site generator written in Swift."
+            homepage "https://github.com/GErP83/my-toucan"
+            version "${{ needs.prepare.outputs.version }}"
+
+            if OS.mac?
+              url "https://github.com/GErP83/my-toucan/releases/download/${{ needs.prepare.outputs.version }}/toucan-macos-${{ needs.prepare.outputs.version }}.zip"
+              sha256 "${{ steps.shas.outputs.macos_sha }}"
+            elsif OS.linux?
+              url "https://github.com/GErP83/my-toucan/releases/download/${{ needs.prepare.outputs.version }}/toucan-linux-${{ needs.prepare.outputs.version }}.zip"
+              sha256 "${{ steps.shas.outputs.linux_sha }}"
+            end
+
+            def install
+              bin.install "toucan"
+              bin.install "toucan-init"
+              bin.install "toucan-generate"
+              bin.install "toucan-serve"
+              bin.install "toucan-watch"
+            end
+
+            test do
+              assert_match "Usage", shell_output("\#{bin}/toucan --help")
+            end
+          end
+          EOF
+
+      #- name: Commit and Push
+      #  run: |
+      #    git config user.name "github-actions[bot]"
+      #    git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      #    git add Formula/my-toucan.rb
+      #    git commit -m "Update formula to version ${{ needs.prepare.outputs.version }}"
+      #    git push
