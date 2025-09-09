@@ -2,12 +2,11 @@ name: Dispatch macOS and Linux Builds on new tag
 
 on:
   push:
-    branches:
-      - main
-    
-    #tags:
-    #  - 'v*'
-    #  - '[0-9]*'
+    #branches:
+    #  - main
+    tags:
+      - 'v*'
+      - '[0-9]*'
 
 permissions:
   contents: write
@@ -26,15 +25,15 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-  #linux:
-  #  needs: prepare
-  #  uses: ./.github/workflows/linux.yml
-  #  with:
-  #    version: ${{ needs.prepare.outputs.version }}
-  #    run_rpm: true
-  #    run_deb: true
-  #    static_stdlib: true
-  #  secrets: inherit
+  linux:
+    needs: prepare
+    uses: ./.github/workflows/linux.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
+      run_rpm: true
+      run_deb: true
+      static_stdlib: true
+    secrets: inherit
 
   macos:
     needs: prepare
