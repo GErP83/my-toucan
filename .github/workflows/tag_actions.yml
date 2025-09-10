@@ -90,10 +90,10 @@ jobs:
             version "$VERSION"
 
             if OS.mac?
-              url "https://github.com/GErP83/my-toucan/releases/download/$VERSION/toucan-macos-$VERSION.zip"
+              url "https://github.com/GErP83/my-toucan/releases/download/$ORIGINAL_VERSION/toucan-macos-$VERSION.zip"
               sha256 "${{ steps.shas.outputs.macos_sha }}"
             elsif OS.linux?
-              url "https://github.com/GErP83/my-toucan/releases/download/$VERSION/toucan-linux-$VERSION.zip"
+              url "https://github.com/GErP83/my-toucan/releases/download/$ORIGINAL_VERSION/toucan-linux-$VERSION.zip"
               sha256 "${{ steps.shas.outputs.linux_sha }}"
             end
 
