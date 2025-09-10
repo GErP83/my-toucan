@@ -67,8 +67,8 @@ jobs:
       - name: Read SHA256 values
         id: shas
         run: |
-          macos_sha=$(awk '{print $1}' toucan-macos-${{ needs.prepare.outputs.version }}.sha256)
-          linux_sha=$(awk '{print $1}' toucan-linux-${{ needs.prepare.outputs.version }}.sha256)
+          macos_sha=$(awk '{print $1}' toucan-macos-1.0.0-beta.7.sha256)
+          linux_sha=$(awk '{print $1}' toucan-linux-1.0.0-beta.7.sha256)
           echo "macos_sha=$macos_sha" >> $GITHUB_OUTPUT
           echo "linux_sha=$linux_sha" >> $GITHUB_OUTPUT
 
