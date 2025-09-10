@@ -67,7 +67,7 @@ jobs:
 
       - name: Download SHA256 files from release
         run: |
-          BASE_URL="https://github.com/GErP83/my-toucan/releases/download/$VERSION"
+          BASE_URL="https://github.com/GErP83/my-toucan/releases/download/$ORIGINAL_VERSION"
           curl -LO "$BASE_URL/toucan-linux-$VERSION.sha256"
           curl -LO "$BASE_URL/toucan-macos-$VERSION.sha256"
 
