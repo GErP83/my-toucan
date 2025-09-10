@@ -12,20 +12,18 @@ permissions:
   contents: write
 
 jobs:
-  prepare:
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.extract.outputs.version }}
-    steps:
-      - name: Extract version from tag
-        id: extract
-        #VERSION="${GITHUB_REF#refs/tags/}"
-        #VERSION="${VERSION//-/.}"  # Replace hyphens for RPM compatibility
-        run: |
-          VERSION="${GITHUB_REF#refs/tags/}" 
-          VERSION= "1.0.0-beta.7" 
-          echo "VERSION=$VERSION" >> $GITHUB_ENV 
-          echo "version=$VERSION" >> $GITHUB_OUTPUT 
+  #prepare:
+  #  runs-on: ubuntu-latest
+  #  outputs:
+  #    version: ${{ steps.extract.outputs.version }}
+  #  steps:
+  #    - name: Extract version from tag
+  #      id: extract
+  #      run: |
+  #        VERSION="${GITHUB_REF#refs/tags/}" 
+  #        VERSION="${VERSION//-/.}" 
+  #        echo "VERSION=$VERSION" >> $GITHUB_ENV 
+  #        echo "version=$VERSION" >> $GITHUB_OUTPUT 
 
   #linux:
   #  needs: prepare
@@ -55,7 +53,7 @@ jobs:
       - name: Checkout Tap Repo
         uses: actions/checkout@v4
         with:
-          repository: GErP83/homebrew-my-toucan   # Replace with your actual tap repo
+          repository: GErP83/homebrew-my-toucan 
           #token: ${{ secrets.HOMEBREW_TAP_PAT }}
           ref: main  # or 'master'
 
@@ -69,13 +67,8 @@ jobs:
       - name: Read SHA256 values
         id: shas
         run: |
-          macos_sha=$(cut -d ' ' -f1 toucan-macos-1.0.0-beta.7.sha256)
-          linux_sha=$(cut -d ' ' -f1 toucan-linux-1.0.0-beta.7.sha256)
-
-          echo "-------------"
-          echo "$macos_sha"
-          echo "$linux_sha"
-
+          macos_sha=$(awk '{print $1}' toucan-macos-${{ needs.prepare.outputs.version }}.sha256)
+          linux_sha=$(awk '{print $1}' toucan-linux-${{ needs.prepare.outputs.version }}.sha256)
           echo "macos_sha=$macos_sha" >> $GITHUB_OUTPUT
           echo "linux_sha=$linux_sha" >> $GITHUB_OUTPUT
 
