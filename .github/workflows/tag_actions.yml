@@ -2,8 +2,6 @@ name: Dispatch macOS and Linux Builds on new tag
 
 on:
   push:
-    #branches:
-    #  - main
     tags:
       - 'v*'
       - '[0-9]*'
@@ -16,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.extract.outputs.version }}
+      original_version: ${{ steps.extract.outputs.original_version }}
     steps:
       - name: Extract version from tag
         id: extract
