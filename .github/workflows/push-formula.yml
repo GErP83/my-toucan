@@ -15,6 +15,9 @@ on:
       formulafile:
         required: true
         type: string
+      formulaclass:
+        required: true
+        type: string
     secrets:
       HOMEBREW_TAP_PAT:
         required: true
@@ -54,7 +57,7 @@ jobs:
         run: |
           mkdir -p Formula
           cat > Formula/${{ inputs.formulafile }} <<EOF
-          class MyToucan < Formula
+          class ${{ inputs.formulaclass }} < Formula
             desc "Toucan is a static site generator written in Swift."
             homepage "$HOMEPAGE"
             version "$VERSION"

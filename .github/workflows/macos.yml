@@ -40,13 +40,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Import Developer ID certificates
+      - name: Import certificates
         uses: apple-actions/import-codesign-certs@v3
         with:
           p12-file-base64: ${{ secrets.MAC_CERTIFICATES }}
           p12-password: ${{ secrets.MAC_CERTIFICATES_PASSWORD }}
 
-      - name: Verify Developer ID certs and expiration
+      - name: Verify certificates
         run: |
           set -e
 
@@ -80,7 +80,6 @@ jobs:
 
       - name: Install Swift 6.1.2
         run: |
-          exit 1
           curl -L https://download.swift.org/swift-6.1.2-release/xcode/swift-6.1.2-RELEASE/swift-6.1.2-RELEASE-osx.pkg -o swift.pkg
           sudo installer -pkg swift.pkg -target /
           export TOOLCHAIN_PATH="/Library/Developer/Toolchains/swift-6.1.2-RELEASE.xctoolchain/usr/bin"
