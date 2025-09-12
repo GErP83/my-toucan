@@ -27,7 +27,7 @@ jobs:
 
   #linux:
   #  needs: prepare
-  #  uses: ./.github/workflows/jobs/linux.yml
+  #  uses: ./.github/workflows/linux.yml
   #  with:
   #    version: ${{ needs.prepare.outputs.version }}
   #    run_rpm: true
@@ -37,7 +37,7 @@ jobs:
 
   macos:
     needs: prepare
-    uses: ./.github/workflows/jobs/macos.yml
+    uses: ./.github/workflows/macos.yml
     with:
       version: ${{ needs.prepare.outputs.version }}
       run_pkg: true
@@ -47,7 +47,7 @@ jobs:
   #push_formula:
   #  name: Push Homebrew Formula
   #  needs: [prepare, linux, macos]
-  #  uses: ./.github/workflows/jobs/push-formula.yml
+  #  uses: ./.github/workflows/push-formula.yml
   #  with:
   #    version: ${{ needs.prepare.outputs.version }}
   #    baseurl: https://github.com/GErP83/my-toucan/releases/download/${{ github.ref_name }}
