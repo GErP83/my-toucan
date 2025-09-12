@@ -21,99 +21,37 @@ jobs:
         run: |
           RAW_VERSION="${GITHUB_REF#refs/tags/}"
           CLEAN_VERSION="${RAW_VERSION//-/.}"
-          echo "Original version: $RAW_VERSION"
-          echo "Modified version: $CLEAN_VERSION"
-          echo "ORIGINAL_VERSION=$RAW_VERSION" >> $GITHUB_ENV
+          echo "Version: $CLEAN_VERSION"
           echo "VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
           echo "version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
-          echo "original_version=$RAW_VERSION" >> $GITHUB_OUTPUT
 
-  linux:
-    needs: prepare
-    uses: ./.github/workflows/linux.yml
-    with:
-      version: ${{ needs.prepare.outputs.version }}
-      run_rpm: true
-      run_deb: true
-      static_stdlib: true
-    secrets: inherit
+  #linux:
+  #  needs: prepare
+  #  uses: ./.github/workflows/jobs/linux.yml
+  #  with:
+  #    version: ${{ needs.prepare.outputs.version }}
+  #    run_rpm: true
+  #    run_deb: true
+  #    static_stdlib: true
+  #  secrets: inherit
 
   macos:
     needs: prepare
-    uses: ./.github/workflows/macos.yml
+    uses: ./.github/workflows/jobs/macos.yml
     with:
       version: ${{ needs.prepare.outputs.version }}
       run_pkg: true
       run_dmg: false
     secrets: inherit
 
-  push_formula:
-    name: Push Homebrew Formula
-    needs: [prepare, linux, macos]
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Tap Repo
-        uses: actions/checkout@v4
-        with:
-          repository: GErP83/homebrew-my-toucan
-          token: ${{ secrets.HOMEBREW_TAP_PAT }}
-          ref: main
-
-      - name: Set Version Variables
-        run: |
-          echo "VERSION=${{ needs.prepare.outputs.version }}" >> $GITHUB_ENV
-          echo "ORIGINAL_VERSION=${{ needs.prepare.outputs.original_version }}" >> $GITHUB_ENV
-
-      - name: Download SHA256 files from release
-        run: |
-          BASE_URL="https://github.com/GErP83/my-toucan/releases/download/$ORIGINAL_VERSION"
-          curl -LO "$BASE_URL/toucan-linux-$VERSION.sha256"
-          curl -LO "$BASE_URL/toucan-macos-$VERSION.sha256"
-
-      - name: Read SHA256 values
-        id: shas
-        run: |
-          macos_sha=$(awk '{print $1}' "toucan-macos-$VERSION.sha256")
-          linux_sha=$(awk '{print $1}' "toucan-linux-$VERSION.sha256")
-          echo "macos_sha=$macos_sha" >> $GITHUB_OUTPUT
-          echo "linux_sha=$linux_sha" >> $GITHUB_OUTPUT
-
-      - name: Write Formula File
-        run: |
-          mkdir -p Formula
-          cat > Formula/my-toucan.rb <<EOF
-          class MyToucan < Formula
-            desc "Toucan is a static site generator written in Swift."
-            homepage "https://github.com/GErP83/my-toucan"
-            version "$VERSION"
-
-            if OS.mac?
-              url "https://github.com/GErP83/my-toucan/releases/download/$ORIGINAL_VERSION/toucan-macos-$VERSION.zip"
-              sha256 "${{ steps.shas.outputs.macos_sha }}"
-            elsif OS.linux?
-              url "https://github.com/GErP83/my-toucan/releases/download/$ORIGINAL_VERSION/toucan-linux-$VERSION.zip"
-              sha256 "${{ steps.shas.outputs.linux_sha }}"
-            end
-
-            def install
-              bin.install "toucan"
-              bin.install "toucan-init"
-              bin.install "toucan-generate"
-              bin.install "toucan-serve"
-              bin.install "toucan-watch"
-            end
-
-            test do
-              assert_match "Usage", shell_output("\#{bin}/toucan --help")
-            end
-          end
-          EOF
-
-      - name: Commit and Push
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Formula/my-toucan.rb
-          git commit -m "Update formula to version $VERSION" || echo "No changes to commit"
-          git push
+  #push_formula:
+  #  name: Push Homebrew Formula
+  #  needs: [prepare, linux, macos]
+  #  uses: ./.github/workflows/jobs/push-formula.yml
+  #  with:
+  #    version: ${{ needs.prepare.outputs.version }}
+  #    baseurl: https://github.com/GErP83/my-toucan/releases/download/${{ github.ref_name }}
+  #    homepage: https://github.com/GErP83/my-toucan
+  #    formulafile: my-toucan.rb
+  #  secrets:
+  #    HOMEBREW_TAP_PAT: ${{ secrets.HOMEBREW_TAP_PAT }}
