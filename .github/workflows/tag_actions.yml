@@ -32,8 +32,8 @@ jobs:
     uses: ./.github/workflows/linux.yml
     with:
       version: ${{ needs.prepare.outputs.version }}
-      run_rpm: false
-      run_deb: false
+      run_rpm: true
+      run_deb: true
       static_stdlib: true
     secrets: inherit
 
