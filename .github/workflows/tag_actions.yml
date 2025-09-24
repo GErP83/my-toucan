@@ -52,10 +52,10 @@ jobs:
     uses: ./.github/workflows/pr-for-formula.yml
     with:
       version: ${{ needs.prepare.outputs.version }}
-      baseurl: https://github.com/toucansites/toucan/releases/download/${{ github.ref_name }}
-      homepage: https://github.com/toucansites/toucan
+      baseurl: https://github.com/GErP83/my-toucan/releases/download/${{ github.ref_name }}
+      homepage: https://github.com/GErP83/my-toucan
       formulafile: toucan.rb
       formulaclass: Toucan
-      repository: toucansites/homebrew-toucan
+      repository: GErP83/homebrew-my-toucan
     secrets:
       HOMEBREW_TAP_PAT: ${{ secrets.HOMEBREW_TAP_PAT }}
