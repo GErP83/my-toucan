@@ -87,18 +87,17 @@ jobs:
           export PATH="$TOOLCHAIN_PATH:$PATH"
           swift --version
 
-      - name: Check for build-relevant changes
+      - name: Check for any changes
         id: check_changes
         run: |
-          if git diff --quiet HEAD^ -- \
-            Package.swift \
-            Package.resolved \
-            Sources/ \
-            scripts/packaging/pkg.sh; then
-            echo "changed=false" >> $GITHUB_OUTPUT
+          set -e
+
+          # Try HEAD^ (previous commit); fallback to HEAD for single-commit repos
+          if git rev-parse HEAD^ >/dev/null 2>&1; then
+            git diff --quiet HEAD^ HEAD && echo "changed=false" || echo "changed=true"
           else
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
+            git diff --quiet HEAD && echo "changed=false" || echo "changed=true"
+          fi >> $GITHUB_OUTPUT
 
       - name: Build Swift binaries for arm64 and x86_64
         if: inputs.run_pkg
