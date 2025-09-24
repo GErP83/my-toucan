@@ -39,6 +39,9 @@ jobs:
       contents: write
     steps:
 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Import certificates
         uses: apple-actions/import-codesign-certs@v3
         with:
@@ -86,9 +89,6 @@ jobs:
           echo "$TOOLCHAIN_PATH" >> $GITHUB_PATH
           export PATH="$TOOLCHAIN_PATH:$PATH"
           swift --version
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
       - name: Show uncommitted changes
         run: |
