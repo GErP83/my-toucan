@@ -87,17 +87,14 @@ jobs:
           export PATH="$TOOLCHAIN_PATH:$PATH"
           swift --version
 
-      - name: Check for any changes
+      - name: Check for uncommitted changes
         id: check_changes
         run: |
-          set -e
-
-          # Try HEAD^ (previous commit); fallback to HEAD for single-commit repos
-          if git rev-parse HEAD^ >/dev/null 2>&1; then
-            git diff --quiet HEAD^ HEAD && echo "changed=false" || echo "changed=true"
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
           else
-            git diff --quiet HEAD && echo "changed=false" || echo "changed=true"
-          fi >> $GITHUB_OUTPUT
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Build Swift binaries for arm64 and x86_64
         if: inputs.run_pkg
