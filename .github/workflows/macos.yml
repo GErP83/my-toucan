@@ -90,20 +90,17 @@ jobs:
           export PATH="$TOOLCHAIN_PATH:$PATH"
           swift --version
 
-      - name: Show uncommitted changes
+      - name: Check for uncommitted changes
         run: |
-          echo "🔍 Uncommitted changes:"
-          git status
-
-          echo "📄 Diff (unstaged changes):"
-          git diff
-
-          echo "📄 Diff (staged changes):"
-          git diff --cached
-
-          echo "📦 Untracked files:"
-          git ls-files --others --exclude-standard
-
+          git_status=$(git status --porcelain)
+          
+          if [[ -n "$git_status" ]]; then
+            echo "🚨 Uncommitted changes detected:"
+            echo "$git_status"
+            exit 1
+          else
+            echo "✅ Working directory is clean. No uncommitted changes."
+          fi
 
       - name: Build Swift binaries for arm64 and x86_64
         if: inputs.run_pkg

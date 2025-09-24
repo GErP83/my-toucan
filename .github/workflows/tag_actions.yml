@@ -2,11 +2,11 @@ name: Dispatch macOS and Linux Builds on new tag
 
 on:
   push:
-    branches:
-      - main
-    #tags:
-    #  - 'v*'
-    #  - '[0-9]*'
+    #branches:
+    #  - main
+    tags:
+      - 'v*'
+      - '[0-9]*'
 
 permissions:
   contents: write
@@ -27,15 +27,15 @@ jobs:
           echo "VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
           echo "version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
 
-  #linux:
-  #  needs: prepare
-  #  uses: ./.github/workflows/linux.yml
-  #  with:
-  #    version: ${{ needs.prepare.outputs.version }}
-  #    run_rpm: false
-  #    run_deb: false
-  #    static_stdlib: true
-  #  secrets: inherit
+  linux:
+    needs: prepare
+    uses: ./.github/workflows/linux.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
+      run_rpm: false
+      run_deb: false
+      static_stdlib: true
+    secrets: inherit
 
   macos:
     needs: prepare
@@ -46,16 +46,16 @@ jobs:
       run_dmg: false
     secrets: inherit
 
-  #pr_for_formula:
-  #  name: Create a PR for Homebrew Formula
-  #  needs: [prepare, linux, macos]
-  #  uses: ./.github/workflows/pr-for-formula.yml
-  #  with:
-  #    version: ${{ needs.prepare.outputs.version }}
-  #    baseurl: https://github.com/toucansites/toucan/releases/download/${{ github.ref_name }}
-  #    homepage: https://github.com/toucansites/toucan
-  #    formulafile: toucan.rb
-  #    formulaclass: Toucan
-  #    repository: toucansites/homebrew-toucan
-  #  secrets:
-  #    HOMEBREW_TAP_PAT: ${{ secrets.HOMEBREW_TAP_PAT }}
+  pr_for_formula:
+    name: Create a PR for Homebrew Formula
+    needs: [prepare, linux, macos]
+    uses: ./.github/workflows/pr-for-formula.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
+      baseurl: https://github.com/toucansites/toucan/releases/download/${{ github.ref_name }}
+      homepage: https://github.com/toucansites/toucan
+      formulafile: toucan.rb
+      formulaclass: Toucan
+      repository: toucansites/homebrew-toucan
+    secrets:
+      HOMEBREW_TAP_PAT: ${{ secrets.HOMEBREW_TAP_PAT }}
