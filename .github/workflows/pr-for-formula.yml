@@ -92,7 +92,7 @@ jobs:
         with:
           token: ${{ secrets.HOMEBREW_TAP_PAT }}
           commit-message: "Update formula to version ${{ env.VERSION }}"
-          branch: ${{ env.BRANCH_NAME }}
+          branch: feature/update-formula-${{ env.VERSION }}
           base: main
           title: "Update Homebrew formula to ${{ env.VERSION }}"
           body: |
