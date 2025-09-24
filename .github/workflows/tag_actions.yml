@@ -2,9 +2,11 @@ name: Dispatch macOS and Linux Builds on new tag
 
 on:
   push:
-    tags:
-      - 'v*'
-      - '[0-9]*'
+    branches:
+      -main
+    #tags:
+    #  - 'v*'
+    #  - '[0-9]*'
 
 permissions:
   contents: write
@@ -30,8 +32,8 @@ jobs:
     uses: ./.github/workflows/linux.yml
     with:
       version: ${{ needs.prepare.outputs.version }}
-      run_rpm: true
-      run_deb: true
+      run_rpm: false
+      run_deb: false
       static_stdlib: true
     secrets: inherit
 
@@ -44,16 +46,16 @@ jobs:
       run_dmg: false
     secrets: inherit
 
-  push_formula:
-    name: Push Homebrew Formula
-    needs: [prepare, linux, macos]
-    uses: ./.github/workflows/push-formula.yml
-    with:
-      version: ${{ needs.prepare.outputs.version }}
-      baseurl: https://github.com/toucansites/toucan/releases/download/${{ github.ref_name }}
-      homepage: https://github.com/toucansites/toucan
-      formulafile: toucan.rb
-      formulaclass: Toucan
-      repository: toucansites/homebrew-toucan
-    secrets:
-      HOMEBREW_TAP_PAT: ${{ secrets.HOMEBREW_TAP_PAT }}
+  #push_formula:
+  #  name: Push Homebrew Formula
+  #  needs: [prepare, linux, macos]
+  #  uses: ./.github/workflows/push-formula.yml
+  #  with:
+  #    version: ${{ needs.prepare.outputs.version }}
+  #    baseurl: https://github.com/toucansites/toucan/releases/download/${{ github.ref_name }}
+  #    homepage: https://github.com/toucansites/toucan
+  #    formulafile: toucan.rb
+  #    formulaclass: Toucan
+  #    repository: toucansites/homebrew-toucan
+  #  secrets:
+  #    HOMEBREW_TAP_PAT: ${{ secrets.HOMEBREW_TAP_PAT }}

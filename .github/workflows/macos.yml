@@ -87,6 +87,19 @@ jobs:
           export PATH="$TOOLCHAIN_PATH:$PATH"
           swift --version
 
+      - name: Check for build-relevant changes
+        id: check_changes
+        run: |
+          if git diff --quiet HEAD^ -- \
+            Package.swift \
+            Package.resolved \
+            Sources/ \
+            scripts/packaging/pkg.sh; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build Swift binaries for arm64 and x86_64
         if: inputs.run_pkg
         run: |
