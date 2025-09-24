@@ -3,7 +3,7 @@ name: Dispatch macOS and Linux Builds on new tag
 on:
   push:
     branches:
-      -main
+      - main
     #tags:
     #  - 'v*'
     #  - '[0-9]*'
