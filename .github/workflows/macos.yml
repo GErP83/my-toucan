@@ -108,7 +108,6 @@ jobs:
       - name: Build Swift binaries for arm64 and x86_64
         if: inputs.run_pkg
         run: |
-          exit 1
           chmod +x scripts/packaging/pkg.sh
           swift build -c release --arch arm64
           swift build -c release --arch x86_64
