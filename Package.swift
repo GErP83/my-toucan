@@ -71,9 +71,10 @@ let package = Package(
             url: "https://github.com/scinfu/SwiftSoup",
             from: "2.8.0"
         ),
-        .package(
-            url: "https://github.com/aus-der-Technik/FileMonitor",
-            from: "1.2.0"
+        .package(  
+//            path: "../FileMonitor"
+            url: "https://github.com/toucansites/FileMonitor",
+            from: "0.1.0"
         ),
         .package(
             url: "https://github.com/Zollerboy1/SwiftCommand",

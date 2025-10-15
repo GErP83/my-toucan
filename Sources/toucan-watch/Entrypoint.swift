@@ -33,13 +33,20 @@ struct Entrypoint: AsyncParsableCommand {
 
     @Option(
         name: .shortAndLong,
+        help:
+            "The directory to ignore, relative to the working directory (default: dist)."
+    )
+    var ignore: String = "dist"
+
+    @Option(
+        name: .shortAndLong,
         help: "The target to build, if empty build all."
     )
     var target: String?
 
     @Option(
         name: .shortAndLong,
-        help: "The treshold to watch for changes in seconds."
+        help: "The treshold to watch for changes in seconds (default: 3)."
     )
     var seconds: Int = 3
 
@@ -59,20 +66,41 @@ struct Entrypoint: AsyncParsableCommand {
     func run() async throws {
         let logger = Logger.subsystem("watch")
 
+        let metadata: Logger.Metadata = [
+            "input": .string(input),
+            "target": .string(target ?? "(default)"),
+            "ignore": .string(ignore),
+            "treshold": .string(String(seconds)),
+        ]
+
+        logger.info(
+            "👀 Watching Toucan site.",
+            metadata: metadata
+        )
+
+        //
+        // NOTE: To test this feature
+        //
+        // 1. Make sure Toucan is installed somwehere.
+        // 2. Edit scheme in Xcode or use `setenv`, e.g.:
+        //     `setenv("PATH", "/usr/local/bin", 1)`
+        // 3. Set a `PATH` environment variable:
+        //      `PATH=/usr/local/bin`
+        //
         let currentToucanCommand = Command.findInPath(withName: "toucan")
         let toucanCommandUrl = currentToucanCommand?.executablePath.string
+
         guard let toucan = toucanCommandUrl,
             FileManager.default.isExecutableFile(atPath: toucan)
         else {
-            logger.error("Toucan is not installed.")
+            logger.error(
+                "Toucan is not installed.",
+                metadata: metadata
+            )
             return
         }
 
-        logger.info("👀 Watching: `\(input)`.")
-
         let inputURL = safeURL(for: input)
-
-        var lastGenerationTime = Date()
 
         let commandURL = URL(fileURLWithPath: toucan)
         let command = Command(
@@ -83,28 +111,40 @@ struct Entrypoint: AsyncParsableCommand {
         let generate = try await command.output.stdout
 
         if !generate.isEmpty {
-            logger.debug(.init(stringLiteral: generate))
+            logger.debug(
+                .init(stringLiteral: generate),
+                metadata: metadata
+            )
             return
         }
 
+        let ignoreURL = inputURL.appendingPathIfPresent(ignore)
+
         let monitor = try FileMonitor(directory: inputURL)
         try monitor.start()
-        for await _ in monitor.stream {
-            let now = Date()
-            let last = lastGenerationTime
-            let diff = abs(last.timeIntervalSince(now))
+        for await event in monitor.stream.debounce(for: .seconds(seconds)) {
 
-            guard diff > Double(seconds) else {  // 3 sec treshold
-                logger.trace("Skipping generation due to treshold...")
+            let eventPath = event.url.path()
+            guard !eventPath.hasPrefix(ignoreURL.path()) else {
+                logger.trace(
+                    "Skipping generation due to ignore path.",
+                    metadata: metadata
+                )
                 continue
             }
-            lastGenerationTime = now
-            logger.info("Generating site...")
+
+            logger.info(
+                "Generating site.",
+                metadata: metadata
+            )
 
             let generate = try await command.output.stdout
 
             if !generate.isEmpty {
-                logger.debug(.init(stringLiteral: generate))
+                logger.debug(
+                    .init(stringLiteral: generate),
+                    metadata: metadata
+                )
                 return
             }
         }
