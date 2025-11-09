@@ -1,33 +1,80 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
+set -e
 
-VERSION=${1:-1.0.0.dev}
-ARCH=${2:-x86_64}
-OUT_DIR="build-rpm"
-SPEC_FILE="scripts/packaging/toucan.spec"
+VERSION="$1"
+ARCH="${2:-$(uname -m)}"
+NAME="toucan"
+
+if [ -z "$VERSION" ]; then
+  echo "Usage: $0 <VERSION> [ARCH]"
+  exit 1
+fi
 
 # Normalize architecture for RPM
 case "$ARCH" in
   arm64) ARCH="aarch64" ;;
   amd64) ARCH="x86_64" ;;
+  x86_64|aarch64) ;; # valid
+  *) echo "⚠️ Unsupported arch '$ARCH' — defaulting to x86_64"; ARCH="x86_64" ;;
 esac
 
-echo "📦 Building Toucan RPM for $ARCH version $VERSION"
+TARBALL="${NAME}-${VERSION}.tar.gz"
+TOPDIR="$(pwd)/build-rpm"
+BIN_DIR=".build/release"
+BUILD_DIR="build-rpm"
+BINARY_NAMES=("toucan" "toucan-generate" "toucan-init" "toucan-serve" "toucan-watch")
 
-mkdir -p "$OUT_DIR/SOURCES"
+echo "📦 Building RPM for $NAME version $VERSION ($ARCH)"
 
-rpmbuild \
-  -bb "$SPEC_FILE" \
-  --define "_topdir $(pwd)/$OUT_DIR" \
-  --define "_sourcedir $(pwd)/$OUT_DIR/SOURCES" \
-  --define "version $VERSION" \
+# Prepare RPM directories
+mkdir -p "$TOPDIR"/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+mkdir -p "$BUILD_DIR"
+WORKDIR=$(mktemp -d)
+trap 'rm -rf "$WORKDIR"' EXIT
+
+# Stage binaries
+SRC_DIR="$WORKDIR/${NAME}-${VERSION}/usr/local/bin"
+mkdir -p "$SRC_DIR"
+EXECUTABLES=()
+
+for BIN in "${BINARY_NAMES[@]}"; do
+  SRC="$BIN_DIR/$BIN"
+  if [ -x "$SRC" ]; then
+    cp "$SRC" "$SRC_DIR/"
+    chmod +x "$SRC_DIR/$BIN"
+    EXECUTABLES+=("$BIN")
+    echo "✅ Staged: $BIN"
+  else
+    echo "⚠️ Skipped: $BIN (not found in $BIN_DIR)"
+  fi
+done
+
+if [ ${#EXECUTABLES[@]} -eq 0 ]; then
+  echo "❌ No valid executables found in $BIN_DIR"
+  exit 1
+fi
+
+# Optionally include license/readme
+cp -f LICENSE README.md "$WORKDIR/${NAME}-${VERSION}/" 2>/dev/null || echo "ℹ️ File(s) not found"
+
+# Create source tarball for rpmbuild
+tar -czf "$TOPDIR/SOURCES/$TARBALL" -C "$WORKDIR" "${NAME}-${VERSION}"
+
+# Copy .spec file
+cp "./scripts/packaging/${NAME}.spec" "$TOPDIR/SPECS/"
+
+# Build the RPM
+rpmbuild -ba "$TOPDIR/SPECS/${NAME}.spec" \
+  --define "ver $VERSION" \
+  --define "_topdir $TOPDIR" \
   --target "$ARCH"
 
-RPM_FILE="$OUT_DIR/RPMS/$ARCH/toucan-linux-$ARCH-$VERSION.rpm"
-mv "$RPM_FILE" "$OUT_DIR/toucan-linux-$ARCH-$VERSION.rpm"
+# Move and rename resulting RPM
+FINAL_RPM=$(find "$TOPDIR/RPMS" -type f -name "*.rpm" | head -n1)
+RPM_OUTPUT="$BUILD_DIR/${NAME}-linux-${ARCH}-${VERSION}.rpm"
+cp "$FINAL_RPM" "$RPM_OUTPUT"
 
-echo "✅ RPM built successfully for $ARCH"
-sha256sum "$OUT_DIR/toucan-linux-$ARCH-$VERSION.rpm" > "$OUT_DIR/toucan-linux-$ARCH-$VERSION.sha256"
+echo "🎉 RPM created: $RPM_OUTPUT"
 
 
 #set -e
