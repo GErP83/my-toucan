@@ -1,5 +1,5 @@
 Name:           toucan
-Version:        %{version}
+Version:        %{ver}
 Release:        1
 Summary:        A static site generator (SSG) written in Swift
 License:        MIT
