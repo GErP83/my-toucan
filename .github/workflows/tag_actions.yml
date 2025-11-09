@@ -1,14 +1,14 @@
 name: Dispatch macOS and Linux Builds on new tag
 
 on:
-  #push:
-  #  tags:
-  #    - 'v*'
-  #    - '[0-9]*'
-
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
+      - '[0-9]*'
+
+  #push:
+  #  branches:
+  #    - main
 
 permissions:
   contents: write
