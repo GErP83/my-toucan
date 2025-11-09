@@ -104,19 +104,28 @@ jobs:
           cd - >/dev/null
 
           echo "✅ ZIP created"
-          
 
-      - name: Upload Linux artifacts
-        if: inputs.run_rpm || inputs.run_deb
+      - name: Upload RPM to artifacts
+        if: inputs.run_rpm
         uses: actions/upload-artifact@v4
         with:
-          name: linux-artifacts-${{ matrix.arch }}
-          retention-days: 1
-          path: |
-            ${{ inputs.run_rpm && format('build-rpm/toucan-linux-{0}-{1}.rpm', matrix.arch, inputs.version) || '' }}
-            ${{ inputs.run_deb && format('build-deb/toucan-linux-{0}-{1}.deb', matrix.arch, inputs.version) || '' }}
-            ${{ inputs.run_rpm && format('build-zip/toucan-linux-{0}-{1}.zip', matrix.arch, inputs.version) || '' }}
+          name: linux-artifacts-${{ matrix.arch }}-rpm
+          path: build-rpm/toucan-linux-${{ matrix.arch }}-${{ inputs.version }}.rpm
 
+      - name: Upload DEB to artifacts
+        if: inputs.run_deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-artifacts-${{ matrix.arch }}-deb
+          path: build-deb/toucan-linux-${{ matrix.arch }}-${{ inputs.version }}.deb
+
+      - name: Upload ZIP to artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-artifacts-${{ matrix.arch }}-zip
+          path: build-zip/toucan-linux-${{ matrix.arch }}-${{ inputs.version }}.zip    
+
+      
   test-and-upload:
     runs-on: ubuntu-latest
     needs: build-binaries
@@ -125,6 +134,8 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
+          pattern: linux-artifacts-*
+          merge-multiple: true
           path: ./packages
 
       # 2️⃣ List downloaded structure
