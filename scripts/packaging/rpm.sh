@@ -67,6 +67,7 @@ cp "./scripts/packaging/${NAME}.spec" "$TOPDIR/SPECS/"
 rpmbuild -ba "$TOPDIR/SPECS/${NAME}.spec" \
   --define "ver $VERSION" \
   --define "_topdir $TOPDIR" \
+  --define "_target_cpu $ARCH" \
   --target "$ARCH"
 
 # Move and rename resulting RPM
