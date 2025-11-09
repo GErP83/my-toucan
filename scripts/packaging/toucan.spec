@@ -5,12 +5,13 @@ Summary:        A static site generator (SSG) written in Swift
 License:        MIT
 URL:            https://github.com/toucansites/toucan
 BuildArch:      %{?_target_cpu}
+Source0:        %{name}-%{version}.tar.gz
 
 %description
 Toucan is a static site generator written in Swift.
 
 %prep
-echo "Skipping setup; using precompiled binaries."
+%setup -q
 
 %build
 echo "Skipping build; using precompiled binaries."
