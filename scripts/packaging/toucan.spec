@@ -10,7 +10,7 @@ BuildArch:      %{?_target_cpu}
 Toucan is a static site generator written in Swift.
 
 %prep
-%setup -q
+echo "Skipping setup; using precompiled binaries."
 
 %build
 echo "Skipping build; using precompiled binaries."
