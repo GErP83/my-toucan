@@ -11,7 +11,7 @@ Source0:        %{name}-%{version}.tar.gz
 Toucan is a static site generator written in Swift.
 
 %prep
-%setup -q -c -T
+%setup -q
 
 %build
 echo "Skipping build; using precompiled binaries."
