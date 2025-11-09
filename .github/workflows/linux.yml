@@ -70,13 +70,13 @@ jobs:
         if: inputs.run_rpm
         run: |
           ARCH=${{ matrix.arch == 'arm64' && 'aarch64' || 'x86_64' }}
-          ./scripts/packaging/rpm.sh ${{ inputs.version || '1.0.0' }} $ARCH
+          ./scripts/packaging/rpm.sh ${{ inputs.version }} $ARCH
 
       - name: Package DEB
         if: inputs.run_deb
         run: |
           ARCH=${{ matrix.arch == 'arm64' && 'arm64' || 'amd64' }}
-          ./scripts/packaging/deb.sh ${{ inputs.version || '1.0.0' }} $ARCH
+          ./scripts/packaging/deb.sh ${{ inputs.version }} $ARCH
 
       - name: Create Linux ZIP (for Homebrew)
         run: |
@@ -84,8 +84,8 @@ jobs:
           ARCH=${{ matrix.arch == 'arm64' && 'arm64' || 'x86_64' }}
           echo "📦 Creating Linux ZIP for $ARCH"
           cp .build/release/toucan* build-zip/
-          (cd build-zip && zip -r toucan-linux-$ARCH-${{ inputs.version || '1.0.0' }}.zip toucan*)
-          sha256sum build-zip/toucan-linux-$ARCH-${{ inputs.version || '1.0.0' }}.zip > build-zip/toucan-linux-$ARCH-${{ inputs.version || '1.0.0' }}.sha256
+          (cd build-zip && zip -r toucan-linux-$ARCH-${{ inputs.version }}.zip toucan*)
+          sha256sum build-zip/toucan-linux-$ARCH-${{ inputs.version }}.zip > build-zip/toucan-linux-$ARCH-${{ inputs.version }}.sha256
           echo "✅ ZIP created for $ARCH"
 
       - name: Upload artifacts for ${{ matrix.arch }}
@@ -110,9 +110,9 @@ jobs:
       - name: Combine SHA256 files
         run: |
           echo "🧮 Combining all checksum files..."
-          find packages -name "*.sha256" -exec cat {} + > toucan-${{ inputs.version || '1.0.0' }}-SHA256SUMS.txt
+          find packages -name "*.sha256" -exec cat {} + > toucan-${{ inputs.version }}-SHA256SUMS.txt
           echo "✅ Combined manifest created:"
-          cat toucan-${{ inputs.version || '1.0.0' }}-SHA256SUMS.txt
+          cat toucan-${{ inputs.version }}-SHA256SUMS.txt
 
       - name: Verify structure
         run: find packages
@@ -162,6 +162,6 @@ jobs:
             packages/**/toucan-linux-*.rpm
             packages/**/toucan-linux-*.deb
             packages/**/toucan-linux-*.zip
-            toucan-${{ inputs.version || '1.0.0' }}-SHA256SUMS.txt
+            toucan-${{ inputs.version }}-SHA256SUMS.txt
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ github.ref_name }}

@@ -37,7 +37,7 @@ cp LICENSE README.md $OUT_DIR/ 2>/dev/null || true
 rpmbuild \
   -bb "$SPEC_FILE" \
   --define "_topdir $(pwd)/$OUT_DIR" \
-  --define "version $VERSION" \
+  --define "ver $VERSION" \
   --target "$ARCH"
 
 RPM_FILE="$OUT_DIR/RPMS/$ARCH/toucan-linux-$ARCH-$VERSION.rpm"
