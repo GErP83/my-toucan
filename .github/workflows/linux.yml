@@ -67,14 +67,6 @@ jobs:
             swift build -c release
           fi
 
-      - name: Prepare RPM environment (for ARM64)
-        if: matrix.arch == 'arm64'
-        run: |
-          echo "🧩 Preparing RPM environment for aarch64..."
-          mkdir -p /usr/lib/rpm/platform/aarch64-linux
-          cp -r /usr/lib/rpm/platform/x86_64-linux/* /usr/lib/rpm/platform/aarch64-linux/
-          echo "✅ RPM platform setup complete"
-
       - name: Package RPM
         if: inputs.run_rpm
         run: |

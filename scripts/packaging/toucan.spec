@@ -4,7 +4,7 @@ Release:        1
 Summary:        A static site generator (SSG) written in Swift
 License:        MIT
 URL:            https://github.com/toucansites/toucan
-BuildArch:      %{?_target_cpu}
+BuildArch:      x86_64 aarch64
 Source0:        %{name}-%{version}.tar.gz
 
 %description
