@@ -106,16 +106,18 @@ jobs:
 
           sha256sum "toucan-linux-$ARCH-${VERSION}.zip" > "toucan-linux-$ARCH-${VERSION}.sha256"
           echo "✅ ZIP + SHA created"
+          
 
-      - name: Upload artifacts for ${{ matrix.arch }}
+      - name: Upload Linux artifacts
+        if: inputs.run_rpm || inputs.run_deb
         uses: actions/upload-artifact@v4
         with:
           name: linux-artifacts-${{ matrix.arch }}
           retention-days: 1
           path: |
-            build-rpm/*
-            build-deb/*
-            build-zip/*
+            ${{ inputs.run_rpm && format('build-rpm/toucan-linux-{0}-{1}.rpm', matrix.arch, inputs.version) || '' }}
+            ${{ inputs.run_deb && format('build-deb/toucan-linux-{0}-{1}.deb', matrix.arch, inputs.version) || '' }}
+            ${{ inputs.run_rpm && format('build-zip/toucan-linux-{0}-{1}.zip', matrix.arch, inputs.version) || '' }}
 
   test-and-upload:
     runs-on: ubuntu-latest
@@ -128,7 +130,7 @@ jobs:
 
       - name: Combine SHA256 files
         run: |
-          echo "🧮 Combining all checksum files..."
+          echo "Combining all checksum files..."
           find packages -name "*.sha256" -exec cat {} + > toucan-${{ inputs.version }}-SHA256SUMS.txt
           echo "✅ Combined manifest created:"
           cat toucan-${{ inputs.version }}-SHA256SUMS.txt
