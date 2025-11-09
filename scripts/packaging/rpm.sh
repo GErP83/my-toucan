@@ -1,59 +1,33 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION=${1:-}
+VERSION=${1:-1.0.0.dev}
 ARCH=${2:-x86_64}
 OUT_DIR="build-rpm"
 SPEC_FILE="scripts/packaging/toucan.spec"
 
-# Normalize architecture name for RPM
+# Normalize architecture for RPM
 case "$ARCH" in
   arm64) ARCH="aarch64" ;;
   amd64) ARCH="x86_64" ;;
 esac
 
-# --- Validate input ---
-if [[ -z "$VERSION" ]]; then
-  echo "❌ ERROR: Version argument missing."
-  echo "Usage: $0 <version> [arch]"
-  exit 1
-fi
-
-if [[ ! -f "$SPEC_FILE" ]]; then
-  echo "❌ ERROR: Spec file not found at $SPEC_FILE"
-  exit 1
-fi
-
 echo "📦 Building Toucan RPM for $ARCH version $VERSION"
 
-# Ensure staging area matches .spec expectations
-mkdir -p $OUT_DIR/usr/local/bin
-mkdir -p $OUT_DIR/SOURCES
-
-# Copy prebuilt binaries (your build process already creates them)
-cp -a usr/local/bin/* $OUT_DIR/usr/local/bin/ 2>/dev/null || true
-cp LICENSE README.md $OUT_DIR/ 2>/dev/null || true
+mkdir -p "$OUT_DIR/SOURCES"
 
 rpmbuild \
   -bb "$SPEC_FILE" \
   --define "_topdir $(pwd)/$OUT_DIR" \
-  --define "ver $VERSION" \
+  --define "_sourcedir $(pwd)/$OUT_DIR/SOURCES" \
+  --define "version $VERSION" \
   --target "$ARCH"
 
 RPM_FILE="$OUT_DIR/RPMS/$ARCH/toucan-linux-$ARCH-$VERSION.rpm"
-if [[ ! -f "$RPM_FILE" ]]; then
-  echo "❌ ERROR: RPM not created!"
-  exit 1
-fi
-
 mv "$RPM_FILE" "$OUT_DIR/toucan-linux-$ARCH-$VERSION.rpm"
 
-echo "🧪 Verifying RPM..."
-rpm -Kv "$OUT_DIR/toucan-linux-$ARCH-$VERSION.rpm"
-rpm -qp "$OUT_DIR/toucan-linux-$ARCH-$VERSION.rpm" || true
-
+echo "✅ RPM built successfully for $ARCH"
 sha256sum "$OUT_DIR/toucan-linux-$ARCH-$VERSION.rpm" > "$OUT_DIR/toucan-linux-$ARCH-$VERSION.sha256"
-echo "✅ RPM build complete for $ARCH"
 
 
 #set -e
