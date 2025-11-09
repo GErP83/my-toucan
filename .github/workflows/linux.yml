@@ -78,25 +78,55 @@ jobs:
           ARCH=${{ matrix.arch == 'arm64' && 'arm64' || 'amd64' }}
           ./scripts/packaging/deb.sh ${{ inputs.version }} $ARCH
 
-      - name: Create Linux ZIP (for Homebrew)
+      - name: Create Linux ZIP and SHA256
         run: |
-          mkdir -p build-zip
+          set -e
           ARCH=${{ matrix.arch == 'arm64' && 'arm64' || 'x86_64' }}
-          echo "📦 Creating Linux ZIP for $ARCH"
-          cp .build/release/toucan* build-zip/
-          (cd build-zip && zip -r toucan-linux-$ARCH-${{ inputs.version }}.zip toucan*)
-          sha256sum build-zip/toucan-linux-$ARCH-${{ inputs.version }}.zip > build-zip/toucan-linux-$ARCH-${{ inputs.version }}.sha256
-          echo "✅ ZIP created for $ARCH"
+          VERSION=${{ env.BUILD_VERSION }}
 
-      - name: Upload artifacts for ${{ matrix.arch }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-artifacts-${{ matrix.arch }}
-          retention-days: 1
-          path: |
-            build-rpm/*
-            build-deb/*
-            build-zip/*
+          echo "📦 Creating Linux ZIP for $ARCH (version: $VERSION)"
+          mkdir -p build-zip
+
+          # Define binaries you want to include
+          BINARIES=("toucan" "toucan-generate" "toucan-init" "toucan-serve" "toucan-watch")
+
+          # Copy only real executables from .build/release
+          for BIN in "${BINARIES[@]}"; do
+            if [ -f ".build/release/$BIN" ]; then
+              cp ".build/release/$BIN" build-zip/
+              echo "✅ Added $BIN"
+            else
+              echo "⚠️ Missing binary: $BIN"
+            fi
+          done
+
+          # Verify copied files
+          echo "📂 Contents of build-zip/"
+          ls -lh build-zip
+
+          # Create ZIP archive
+          cd build-zip
+          zip -r "../toucan-linux-$ARCH-$VERSION.zip" ./*
+          cd - >/dev/null
+
+          # Generate SHA256 checksum
+          cd build-zip/..
+          sha256sum "toucan-linux-$ARCH-$VERSION.zip" > "toucan-linux-$ARCH-$VERSION.sha256"
+          cd - >/dev/null
+
+          echo "✅ Created:"
+          echo "  - toucan-linux-$ARCH-$VERSION.zip"
+          echo "  - toucan-linux-$ARCH-$VERSION.sha256"
+
+            - name: Upload artifacts for ${{ matrix.arch }}
+              uses: actions/upload-artifact@v4
+              with:
+                name: linux-artifacts-${{ matrix.arch }}
+                retention-days: 1
+                path: |
+                  build-rpm/*
+                  build-deb/*
+                  build-zip/*
 
   test-and-upload:
     runs-on: ubuntu-latest
