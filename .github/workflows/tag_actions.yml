@@ -35,7 +35,7 @@ jobs:
     with:
       version: ${{ needs.prepare.outputs.version }}
       run_rpm: true
-      run_deb: false
+      run_deb: true
       static_stdlib: true
     secrets: inherit
 
