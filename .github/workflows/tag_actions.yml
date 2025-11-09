@@ -1,10 +1,14 @@
 name: Dispatch macOS and Linux Builds on new tag
 
 on:
+  #push:
+  #  tags:
+  #    - 'v*'
+  #    - '[0-9]*'
+
   push:
-    tags:
-      - 'v*'
-      - '[0-9]*'
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -35,25 +39,25 @@ jobs:
       static_stdlib: true
     secrets: inherit
 
-  macos:
-    needs: prepare
-    uses: ./.github/workflows/macos.yml
-    with:
-      version: ${{ needs.prepare.outputs.version }}
-      run_pkg: true
-      run_dmg: false
-    secrets: inherit
+  #macos:
+  #  needs: prepare
+  #  uses: ./.github/workflows/macos.yml
+  #  with:
+  #    version: ${{ needs.prepare.outputs.version }}
+  #    run_pkg: true
+  #    run_dmg: false
+  #  secrets: inherit
 
-  pr_for_formula:
-    name: Create a PR for Homebrew Formula
-    needs: [prepare, linux, macos]
-    uses: ./.github/workflows/pr-for-formula.yml
-    with:
-      version: ${{ needs.prepare.outputs.version }}
-      baseurl: https://github.com/toucansites/toucan/releases/download/${{ github.ref_name }}
-      homepage: https://github.com/toucansites/toucan
-      formulafile: toucan.rb
-      formulaclass: Toucan
-      repository: toucansites/homebrew-toucan
-    secrets:
-      HOMEBREW_TAP_PAT: ${{ secrets.HOMEBREW_TAP_PAT }}
+  #pr_for_formula:
+  #  name: Create a PR for Homebrew Formula
+  #  needs: [prepare, linux, macos]
+  #  uses: ./.github/workflows/pr-for-formula.yml
+  #  with:
+  #    version: ${{ needs.prepare.outputs.version }}
+  #    baseurl: https://github.com/toucansites/toucan/releases/download/${{ github.ref_name }}
+  #    homepage: https://github.com/toucansites/toucan
+  #    formulafile: toucan.rb
+  #    formulaclass: Toucan
+  #    repository: toucansites/homebrew-toucan
+  #  secrets:
+  #    HOMEBREW_TAP_PAT: ${{ secrets.HOMEBREW_TAP_PAT }}
