@@ -45,7 +45,6 @@ jobs:
     name: Build ${{ matrix.arch }}
     container:
       image: swift:6.0
-      options: ${{ matrix.arch == 'arm64' && '--platform linux/arm64/v8' || '' }}
     permissions:
       contents: write
     steps:
